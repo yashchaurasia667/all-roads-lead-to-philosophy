@@ -1,17 +1,12 @@
 "use client";
 
-import { SyntheticEvent, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { SyntheticEvent, useMemo, useRef, useState } from "react";
 
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import ScrollTrigger from "gsap/ScrollTrigger";
-import ScrollToPlugin from "gsap/ScrollToPlugin";
+import { ReactLenis, useLenis } from "lenis/react";
 
-import Lenis from "lenis";
 import { CaretDownIcon } from "@phosphor-icons/react/dist/ssr/CaretDown";
-
-gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 export default function Home() {
   const images = [
@@ -35,8 +30,9 @@ export default function Home() {
     ));
   }, []);
 
-  const imageContainer = useRef(null);
+  const imageContainer = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [brightness, setBrightness] = useState<number>(75);
 
   const onSearch = (e: SyntheticEvent) => {
     e.preventDefault();
@@ -44,73 +40,88 @@ export default function Home() {
 
     console.log("searching");
   };
-
-  const scrollToSearch = () => {
-    gsap.to(window, {
-      duration: 1.2,
-      scrollTo: "#search",
-      ease: "power2.inOut",
-    });
+  const changeBgBrightness = (direction: number) => {
+    if (direction == 1)
+      gsap.to(imageContainer.current, {
+        filter: "brightness(50%)",
+        duration: 0.3,
+        ease: "power2.inOut",
+      });
+    else if (direction == -1)
+      gsap.to(imageContainer.current, {
+        filter: "brightness(70%)",
+        duration: 3.5,
+      });
   };
 
-  useGSAP(() => {
-    let hasScrolled = false;
-
-    ScrollTrigger.create({
-      trigger: "#hero",
-      start: "top top",
-      endTrigger: "#search",
-      end: "bottom 50%+=100px",
-      onToggle: (self) => {
-        if (!hasScrolled && self.direction === 1 && self.progress > 0) {
-          hasScrolled = true;
-          scrollToSearch();
-        }
-        hasScrolled = self.isActive;
-        console.log("toggled, isActive:", self.isActive);
-      },
+  const lenis = useLenis((e) => {
+    e.on("scroll", () => {
+      if (e.direction == 1) {
+        e.scrollTo("#search", {
+          duration: 1.5,
+          onStart: () => changeBgBrightness(e.direction),
+        });
+      } else if (e.direction == -1) {
+        e.scrollTo("#hero", {
+          duration: 1.5,
+          onStart: () => changeBgBrightness(e.direction),
+        });
+      }
     });
   }, []);
 
   return (
-    <main className="relative min-h-screen w-full overflow-x-hidden">
-      <div
-        ref={imageContainer}
-        className="grid grid-cols-4 fixed inset-0 w-full h-[100dvh] -z-10 brightness-75"
-      >
-        {imageElements}
-      </div>
+    <>
+      <ReactLenis root />
+      <main className="relative min-h-screen w-full overflow-x-hidden">
+        <div
+          ref={imageContainer}
+          className="grid grid-cols-4 fixed inset-0 w-full h-[100dvh] -z-10"
+          style={{ filter: "brightness(70%)" }}
+        >
+          {imageElements}
+        </div>
 
-      <section
-        id="hero"
-        className="relative h-[100dvh] w-full flex flex-col items-center justify-center px-4"
-      >
-        <h1 className="hero text-8xl font-medium abril-fatface text-center z-10">
-          All Roads Lead to Philosophy
-        </h1>
+        <section
+          id="hero"
+          className="relative h-dvh w-full flex flex-col items-center justify-center px-4"
+        >
+          <h1 className="text-8xl font-medium abril-fatface text-center z-10">
+            All Roads Lead to Philosophy
+          </h1>
 
-        <CaretDownIcon
-          size={48}
-          fill="#ffffffaa"
-          className="z-10 font-bold absolute bottom-6 animate-caret cursor-pointer hover:scale-105"
-        />
-      </section>
-
-      <section id="search" className="z-10 min-h-screen">
-        <form onSubmit={onSearch} className="px-5 py-8 ">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="p-2 text-black border rounded"
+          <CaretDownIcon
+            size={48}
+            fill="#ffffffaa"
+            className="z-10 font-bold absolute bottom-6 animate-caret cursor-pointer hover:scale-105"
+            onClick={() => {
+              lenis?.scrollTo("#search");
+            }}
           />
-          <button type="submit" className="ml-2 p-2 rounded">
-            Search
-          </button>
-        </form>
+        </section>
 
-        <section className="results">results shown here</section>
-      </section>
-    </main>
+        <section id="search" className="z-10 min-h-screen grid grid-cols-2">
+          <form
+            onSubmit={onSearch}
+            className="px-5 py-8 flex flex-col justify-center items-start"
+          >
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="p-2 border rounded w-3/4 bg-[#111212aa] text-lg outline-none border-none px-4 py-4"
+            />
+            <button
+              type="submit"
+              className="ml-2 p-2 rounded cursor-pointer bg-red-900 my-4 rounded-xl px-6 py-4"
+            >
+              Search
+            </button>
+          </form>
+
+          <section className="results">results shown here</section>
+        </section>
+      </main>
+    </>
   );
 }
