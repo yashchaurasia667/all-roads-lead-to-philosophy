@@ -1,11 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap');
 @import "tailwindcss";
 
+html {
+  background-color: #111212;
+  color: #f0dac2;
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
 .abril-fatface {
   font-family: "Abril Fatface", serif;
 }
 
 @keyframes subtle-bounce {
+
   0%,
   100% {
     transform: translateY(0);
