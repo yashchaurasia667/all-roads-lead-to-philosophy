@@ -1,12 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { SyntheticEvent, useMemo, useRef, useState } from "react";
+import { SyntheticEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import gsap from "gsap";
 import { ReactLenis, useLenis } from "lenis/react";
 
 import { CaretDownIcon } from "@phosphor-icons/react/dist/ssr/CaretDown";
+import next from "next";
 
 export default function Home() {
   const images = [
@@ -32,18 +33,80 @@ export default function Home() {
 
   const imageContainer = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [brightness, setBrightness] = useState<number>(75);
+  const [data, setData] = useState<{ title: string; next: string }[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [complete, setComplete] = useState<boolean>(false);
 
-  const onSearch = (e: SyntheticEvent) => {
-    e.preventDefault();
-    if (searchTerm === "") return;
+  const handleScrape = async (url: string) => {
+    if (complete) return;
+    if (!url) return;
+    setLoading(true);
 
-    console.log("searching");
+    try {
+      const res = await fetch("/api/scrape", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+
+      const result = await res.json();
+      if (!result.success) {
+        console.error("Request failed", result.error);
+        return;
+      }
+
+      setData((prev) => {
+        // Prevent duplicate entries
+        const exists = prev.some((item) => item.title === result.title);
+        if (exists) return prev; // Return existing array without triggering a re-render
+
+        return [...prev, { title: result.title, next: result.next }];
+      });
+      if (result.title == "Philosophy") setComplete(true);
+    } catch (err) {
+      console.error("Failed to fetch from internal API:", err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const onSearch = async (e: SyntheticEvent) => {
+    e.preventDefault();
+    if (!searchTerm.trim()) return;
+
+    // Reset dataset on a brand new search
+    setData([]);
+    setComplete(false);
+
+    const keyword = searchTerm.trim().split(" ").join("_");
+    const search_url = `https://en.wikipedia.org/wiki/${keyword}`;
+    console.log(`Searching for: ${search_url}`);
+
+    handleScrape(search_url);
+  };
+
+  useEffect(() => {
+    if (data.length === 0) return;
+
+    const lastItem = data[data.length - 1];
+    if (lastItem.title == "Philosophy") return;
+
+    if (lastItem.next) {
+      const isAlreadyVisited = data.some(
+        (item) => item.title === lastItem.next,
+      );
+
+      if (!isAlreadyVisited) {
+        console.log(`Searching for: ${lastItem.next}`);
+        handleScrape(lastItem.next);
+      }
+    }
+  }, [data]);
+
   const changeBgBrightness = (direction: number) => {
     if (direction == 1)
       gsap.to(imageContainer.current, {
-        filter: "brightness(50%)",
+        filter: "brightness(20%)",
         duration: 0.3,
         ease: "power2.inOut",
       });
@@ -113,7 +176,7 @@ export default function Home() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="p-2 rounded-full w-full bg-[#111212aa] text-lg outline-none px-4 py-4 border-[#f0dac2] focus-within:border-3 transition-all border-box"
+              className="p-2 rounded-full w-full bg-[#111212aa] text-lg outline-none px-4 py-4 border-2 border-[#f0dac2] focus-within:border-3 transition-all border-box"
             />
             <button
               type="submit"
