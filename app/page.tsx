@@ -56,6 +56,7 @@ export default function Home() {
 
   const lenis = useLenis((e) => {
     e.on("scroll", () => {
+      console.log("Scrolling");
       if (e.direction == 1) {
         e.scrollTo("#search", {
           duration: 1.5,
@@ -86,7 +87,7 @@ export default function Home() {
           id="hero"
           className="relative h-dvh w-full flex flex-col items-center justify-center px-4"
         >
-          <h1 className="text-8xl font-medium abril-fatface text-center z-10">
+          <h1 className="relative inline-block group origin-bottom font-medium text-8xl abril-fatface text-center z-10 transition-all duration-300 hover:-skew-x-12 hover:[text-shadow:0_0_2px_currentColor,0_0_2px_currentColor] after:absolute after:bottom-0 after:left-0 after:h-[4px] after:w-full after:origin-bottom-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100">
             All Roads Lead to Philosophy
           </h1>
 
@@ -100,20 +101,23 @@ export default function Home() {
           />
         </section>
 
-        <section id="search" className="z-10 min-h-screen grid grid-cols-2">
+        <section
+          id="search"
+          className="z-10 min-h-screen grid grid-cols-[40%_1fr]"
+        >
           <form
             onSubmit={onSearch}
-            className="px-5 py-8 flex flex-col justify-center items-start"
+            className="px-5 py-8 flex flex-col justify-center items-end"
           >
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="p-2 border rounded w-3/4 bg-[#111212aa] text-lg outline-none border-none px-4 py-4"
+              className="p-2 rounded-full w-full bg-[#111212aa] text-lg outline-none px-4 py-4 border-[#f0dac2] focus-within:border-3 transition-all border-box"
             />
             <button
               type="submit"
-              className="ml-2 p-2 rounded cursor-pointer bg-red-900 my-4 rounded-xl px-6 py-4"
+              className="text-lg ml-2 cursor-pointer outline-none bg-red-900 hover:bg-red-800 active:bg-red-700 my-4 rounded-full px-8 py-3 hover:font-medium transition-all"
             >
               Search
             </button>
