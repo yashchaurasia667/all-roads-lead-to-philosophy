@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { SyntheticEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import gsap from "gsap";
 import { ReactLenis, useLenis } from "lenis/react";
 
 import { CaretDownIcon } from "@phosphor-icons/react/dist/ssr/CaretDown";
-import next from "next";
+import { LinkIcon } from "@phosphor-icons/react";
 
 export default function Home() {
   const images = [
@@ -16,6 +17,12 @@ export default function Home() {
     "temptation.jpeg",
     "fallen_angel.jpeg",
   ];
+
+  const imageContainer = useRef<HTMLDivElement>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [data, setData] = useState<{ title: string; next: string }[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [complete, setComplete] = useState<boolean>(false);
 
   const imageElements = useMemo(() => {
     return images.map((img, index) => (
@@ -31,11 +38,30 @@ export default function Home() {
     ));
   }, []);
 
-  const imageContainer = useRef<HTMLDivElement>(null);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [data, setData] = useState<{ title: string; next: string }[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [complete, setComplete] = useState<boolean>(false);
+  const nodes = useMemo(() => {
+    return data.map((node, index) => (
+      <span key={index} className="my-5 relative flex gap-4">
+        <Link
+          href={`https://en.wikipedia.org/wiki/${node.title}`}
+          target="_blank"
+          className="inline-block text-xl border-5 hover:scale-105 rounded-[50%] p-6 transition-all"
+        >
+          {" "}
+        </Link>
+        <span className="flex flex-col px-6 py-4 rounded-xl bg-[#f0dac2] text-black absolute">
+          <p className="text-2xl font-medium">{node.title}</p>
+          <Link
+            href={`https://en.wikipedia.org/wiki/${node.title}`}
+            target="_blank"
+            className="text-lg hover:underline"
+          >
+            {`https://en.wikipedia.org/wiki/${node.title}`}
+            <LinkIcon size={16} stroke="black" className="inline px-4" />
+          </Link>
+        </span>
+      </span>
+    ));
+  }, [data]);
 
   const handleScrape = async (url: string) => {
     if (complete) return;
@@ -74,7 +100,6 @@ export default function Home() {
     e.preventDefault();
     if (!searchTerm.trim()) return;
 
-    // Reset dataset on a brand new search
     setData([]);
     setComplete(false);
 
@@ -117,22 +142,22 @@ export default function Home() {
       });
   };
 
-  const lenis = useLenis((e) => {
-    e.on("scroll", () => {
-      console.log("Scrolling");
-      if (e.direction == 1) {
-        e.scrollTo("#search", {
-          duration: 1.5,
-          onStart: () => changeBgBrightness(e.direction),
-        });
-      } else if (e.direction == -1) {
-        e.scrollTo("#hero", {
-          duration: 1.5,
-          onStart: () => changeBgBrightness(e.direction),
-        });
-      }
-    });
-  }, []);
+  // const lenis = useLenis((e) => {
+  //   e.on("scroll", () => {
+  //     console.log("Scrolling");
+  //     if (e.direction == 1) {
+  //       e.scrollTo("#search", {
+  //         duration: 1.5,
+  //         onStart: () => changeBgBrightness(e.direction),
+  //       });
+  //     } else if (e.direction == -1) {
+  //       e.scrollTo("#hero", {
+  //         duration: 1.5,
+  //         onStart: () => changeBgBrightness(e.direction),
+  //       });
+  //     }
+  //   });
+  // }, []);
 
   return (
     <>
@@ -186,7 +211,7 @@ export default function Home() {
             </button>
           </form>
 
-          <section className="results">results shown here</section>
+          <section className="results">{nodes}</section>
         </section>
       </main>
     </>
