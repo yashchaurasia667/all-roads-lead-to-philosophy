@@ -105,9 +105,10 @@ const Search = () => {
       >
         <input
           type="text"
+          placeholder="Type a random Wikipedia page"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="p-2 rounded-full w-full bg-[#111212aa] text-lg outline-none px-4 py-4 border-2 border-[#f0dac2] focus-within:border-3 transition-all border-box"
+          className="p-2 rounded-full w-full bg-[#121212cc] text-lg outline-none px-4 py-4 border-2 border-[#f0dac2] focus-within:border-3 transition-all border-box"
         />
         <button
           type="submit"
@@ -117,9 +118,7 @@ const Search = () => {
         </button>
       </form>
 
-      <section className="results h-full">
-        {data.length > 0 && <Graph data={data} />}
-      </section>
+      <section className="results h-full">{<Graph data={data} />}</section>
     </section>
   );
 };

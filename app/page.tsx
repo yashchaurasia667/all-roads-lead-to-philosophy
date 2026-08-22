@@ -1,14 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { useRef } from "react";
 
 import gsap from "gsap";
-import { ReactLenis, useLenis } from "lenis/react";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/all";
 
 import Hero from "@/components/Hero";
 import Search from "@/components/Search";
 
+gsap.registerPlugin(ScrollTrigger);
 export default function Home() {
   const imageContainer = useRef<HTMLDivElement>(null);
 
@@ -26,9 +27,10 @@ export default function Home() {
       });
   };
 
+  useGSAP(() => {}, []);
+
   return (
     <>
-      <ReactLenis root />
       <main className="relative min-h-screen w-full overflow-x-hidden">
         <Hero />
         <Search />
