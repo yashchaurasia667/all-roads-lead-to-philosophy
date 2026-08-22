@@ -36,7 +36,7 @@ const Hero = () => {
         id="hero"
         className="relative h-dvh w-full flex flex-col items-center justify-center px-4"
       >
-        <h1 className="relative inline-block group origin-bottom font-medium text-8xl abril-fatface text-center z-10 transition-all duration-300 hover:-skew-x-12 hover:[text-shadow:0_0_2px_currentColor,0_0_2px_currentColor] after:absolute after:bottom-0 after:left-0 after:h-[4px] after:w-full after:origin-bottom-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100">
+        <h1 className="relative inline-block group origin-bottom font-medium text-6xl lg:text-8xl abril-fatface text-center z-10 transition-all duration-300 hover:-skew-x-12 hover:[text-shadow:0_0_2px_currentColor,0_0_2px_currentColor] after:absolute after:bottom-0 after:left-0 after:h-[4px] after:w-full after:origin-bottom-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100">
           All Roads Lead to Philosophy
         </h1>
 

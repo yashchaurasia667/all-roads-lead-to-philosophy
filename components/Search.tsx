@@ -1,5 +1,3 @@
-import { LinkIcon } from "@phosphor-icons/react";
-import Link from "next/link";
 import { SyntheticEvent, useEffect, useMemo, useState } from "react";
 import Graph from "./Graph";
 
@@ -33,13 +31,14 @@ const Search = () => {
 
         return [...prev, { title: result.title, next: result.next }];
       });
-      if (result.title == "Philosophy") setComplete(true);
+      if (result.title === "Philosophy") setComplete(true);
     } catch (err) {
       console.error("Failed to fetch from internal API:", err);
     } finally {
       setLoading(false);
     }
   };
+
   const onSearch = async (e: SyntheticEvent) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
@@ -49,40 +48,15 @@ const Search = () => {
 
     const keyword = searchTerm.trim().split(" ").join("_");
     const search_url = `https://en.wikipedia.org/wiki/${keyword}`;
-    console.log(`Searching for: ${search_url}`);
 
     handleScrape(search_url);
   };
-
-  const nodes = useMemo(() => {
-    return data.map((node, index) => (
-      <span key={index} className="m-5 relative flex gap-4">
-        <Link
-          href={`https://en.wikipedia.org/wiki/${node.title}`}
-          target="_blank"
-          className="inline-block text-xl border-5 hover:scale-105 rounded-[50%] p-5 hover:bg-[#f0dac2] transition-all group"
-        >
-          <span className="z-10 flex flex-col px-4 py-2 rounded-xl bg-[#f0dac2] text-black absolute top-0 left-[130%] invisible hover:visible group-hover:visible transition-all transition-duration-[500]">
-            <p className="text-2xl font-medium">{node.title}</p>
-            <Link
-              href={`https://en.wikipedia.org/wiki/${node.title}`}
-              target="_blank"
-              className="text-lg hover:underline"
-            >
-              {`https://en.wikipedia.org/wiki/${node.title}`}
-              <LinkIcon size={16} stroke="black" className="inline px-4" />
-            </Link>
-          </span>
-        </Link>
-      </span>
-    ));
-  }, [data]);
 
   useEffect(() => {
     if (data.length === 0) return;
 
     const lastItem = data[data.length - 1];
-    if (lastItem.title == "Philosophy") return;
+    if (lastItem.title === "Philosophy") return;
 
     if (lastItem.next) {
       const isAlreadyVisited = data.some(
@@ -90,7 +64,6 @@ const Search = () => {
       );
 
       if (!isAlreadyVisited) {
-        console.log(`Searching for: ${lastItem.next}`);
         // eslint-disable-next-line react-hooks/set-state-in-effect
         handleScrape(lastItem.next);
       }
@@ -98,27 +71,37 @@ const Search = () => {
   }, [data]);
 
   return (
-    <section id="search" className="z-10 min-h-screen grid grid-cols-[40%_1fr]">
+    <section
+      id="search"
+      className="z-10 min-h-screen w-full max-w-full overflow-x-hidden flex flex-col lg:grid lg:grid-cols-[30%_1fr] px-4 sm:px-8 py-6 gap-6"
+    >
       <form
         onSubmit={onSearch}
-        className="px-5 py-8 flex flex-col justify-center items-end"
+        className="w-full flex flex-col items-center lg:items-end justify-center gap-3"
       >
-        <input
-          type="text"
-          placeholder="Type a random Wikipedia page"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="p-2 rounded-full w-full bg-[#121212cc] text-lg outline-none px-4 py-4 border-2 border-[#f0dac2] focus-within:border-3 transition-all border-box"
-        />
+        <div className="w-full relative">
+          <input
+            type="text"
+            placeholder="Type a random Wikipedia page"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-[#121212cc] text-base sm:text-lg text-white outline-none px-4 py-3 sm:py-4 rounded-full border-2 border-[#f0dac2] focus:border-red-500 transition-all box-border"
+          />
+        </div>
         <button
           type="submit"
-          className="text-lg ml-2 cursor-pointer outline-none bg-red-900 hover:bg-red-800 active:bg-red-700 my-4 rounded-full px-8 py-3 hover:font-medium transition-all"
+          disabled={loading}
+          className="w-full lg:w-fit text-base sm:text-lg cursor-pointer outline-none bg-red-900 hover:bg-red-800 active:bg-red-700 rounded-full px-8 py-3 transition-all font-medium text-white disabled:opacity-50"
         >
-          Search
+          {loading ? "Scraping..." : "Search"}
         </button>
       </form>
 
-      <section className="results h-full">{<Graph data={data} />}</section>
+      <section className="results relative w-full max-w-full lg:h-full overflow-auto touch-pan-x touch-pan-y rounded-2xl border border-white/10 bg-black/20 p-4">
+        <div className="min-w-[600px] min-h-[500px] w-full h-full">
+          <Graph data={data} />
+        </div>
+      </section>
     </section>
   );
 };
